@@ -1,0 +1,62 @@
+/* Hide access-restricted elements even if class styles set display. */
+[hidden] { display: none !important; }
+:root{font-family:Inter,Pretendard,'Noto Sans KR',system-ui,sans-serif;color:#e9f0fc;background:#0a1020}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}.shell{display:flex;min-height:100vh}.sidebar{width:240px;background:#101a2d;padding:25px 16px;display:flex;flex-direction:column;border-right:1px solid #293853;position:sticky;top:0;height:100vh}.brand{display:flex;gap:10px;align-items:center;color:white;text-decoration:none;font-weight:850;font-size:16px;letter-spacing:.4px;padding:12px 8px 29px}.brand b{color:#56e9b8}.brand small{display:block;color:#91a0b9;font-size:10px;letter-spacing:2px;margin-top:4px}.ball{font-size:28px;color:#56e9b8}.nav{display:block;width:100%;border:0;text-align:left;padding:14px 16px;border-radius:12px;background:transparent;color:#9eafc9;margin:3px 0}.nav span{margin-left:9px}.nav:hover,.nav.active{background:#203352;color:#e8fff5}.nav.active{box-shadow:inset 3px 0 #4adea8}.sidefoot{margin-top:auto;border-top:1px solid #304059;padding-top:16px;color:#a2b3c8;font-size:12px}.sidefoot button{display:block;margin-top:10px}main{max-width:1560px;width:100%;margin:auto;padding:34px 38px 70px}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px}h1{font-size:32px;margin:3px 0 6px;letter-spacing:-1px}h2{font-size:19px;margin:0 0 12px}.eyebrow{color:#58e4b2;letter-spacing:2px;font-weight:800;font-size:11px}header p,.panel p{color:#a1b0c7;margin:6px 0 18px;font-size:14px}.right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.status,.pill{font-size:12px;color:#72e8b8;background:#163c3b;border:1px solid #286b58;border-radius:99px;padding:8px 12px}.panel{background:#152137;border:1px solid #293a56;border-radius:17px;padding:22px;margin-bottom:21px}.setup{border-color:#317c81}input,select{min-height:40px;color:#f2f8ff;background:#101a2c;border:1px solid #334866;border-radius:9px;padding:9px 11px;outline:none}input:focus,select:focus{border-color:#52d6ad}label{display:flex;flex-direction:column;gap:6px;color:#c5d5e9;font-size:13px;flex:1}.fieldrow,.actions{display:flex;gap:12px;margin:15px 0}.fieldrow input{width:100%}button:not(.nav):not(.tab){background:#37cea1;color:#061b17;border:0;border-radius:10px;padding:10px 15px;font-weight:700}.minor,button.minor{background:#253753!important;color:#dce8f7!important;border:1px solid #405573!important}.muted{color:#899bb7!important;font-size:12px!important}.authbox{max-width:430px;margin:32px auto}.authbox label{margin:16px 0}.authbox h2{font-size:27px;margin-top:20px}.authbox input{width:100%}.message{min-height:24px;color:#f7c879!important}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:19px}.stat{background:#152137;border:1px solid #283957;border-radius:16px;padding:20px}.stat .num{font-size:30px;font-weight:850;color:#63eaba;margin-top:7px}.stat .key{color:#9badc7;font-size:12px}.stat .sub{font-size:11px;color:#7189a8;margin-top:8px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 16px}.tabs{display:flex;border-radius:11px;background:#0c1729;padding:4px}.tab{background:transparent;color:#a4b6ce;border:0;border-radius:8px;padding:10px 15px;font-weight:700}.tab.active{color:#072218;background:#50deaa}.filters{display:flex;gap:8px;flex-wrap:wrap}.filters input{min-width:200px}.dexgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:13px}.pokemon{position:relative;background:linear-gradient(155deg,#192a42,#121d31);border:1px solid #31415c;border-radius:16px;padding:16px 13px;min-height:222px;transition:.15s;text-align:center}.pokemon:hover{transform:translateY(-2px);border-color:#66d3b0}.pokemon.iscaught{border-color:#319b7c;background:linear-gradient(140deg,#124237,#162a3c)}.pokemon .number{position:absolute;left:13px;top:13px;color:#8095b0;font-size:12px}.pokemon .caughticon{position:absolute;right:12px;top:10px;color:#6df4c0;font-weight:800}.pokemon img{height:96px;width:96px;object-fit:contain;margin:17px auto 5px;image-rendering:pixelated}.pokemon .name{font-weight:800;font-size:16px}.types{display:flex;justify-content:center;gap:5px;margin:8px 0;min-height:22px}.type{font-size:10px;background:#42546f;color:#fff;border-radius:30px;padding:4px 9px}.type.불꽃{background:#a95d43}.type.물{background:#3775b6}.type.풀{background:#427d49}.type.전기{background:#b18b2c}.type.에스퍼{background:#a34d84}.type.드래곤{background:#584fa6}.type.독{background:#79439a}.type.얼음{background:#418d9b}.pokemon .evo{font-size:11px;color:#a7b8cf;min-height:17px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.pokemon .catchbtn{margin-top:10px;width:100%;background:#273a53!important;color:#deecfa!important;border:1px solid #465a73!important;font-size:12px;padding:8px!important}.pokemon.iscaught .catchbtn{background:#256e59!important;color:#e2fff4!important}.bottom{text-align:center;margin:28px}.progress-row{display:grid;grid-template-columns:78px 1fr 65px;gap:14px;align-items:center;margin:15px 0;font-size:13px;color:#cbd7e9}.track{height:9px;background:#31435d;border-radius:30px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#1cbcb1,#6cf0a2);border-radius:30px}.person{display:flex;align-items:center;gap:12px;padding:15px 9px;border-bottom:1px solid #2b405d}.person .label{flex:1}.person b{color:#64e9bb}.person small{color:#99adc7}.person button{font-size:12px}.toast{position:fixed;bottom:26px;right:26px;background:#264939;padding:14px 20px;border:1px solid #62cb99;color:white;border-radius:12px;opacity:0;pointer-events:none;transform:translateY(8px);transition:.2s}.toast.show{opacity:1;transform:translateY(0)}code{color:#70dfbf}@media(max-width:900px){.sidebar{width:69px;padding:20px 8px}.brand{font-size:0;padding:10px}.ball{font-size:25px}.brand small,.sidebar nav span,.sidefoot{display:none}.nav{text-align:center;padding:13px 8px}main{padding:23px 16px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.fieldrow{flex-direction:column}}@media(max-width:580px){header{align-items:start;flex-direction:column}h1{font-size:27px}.dexgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.pokemon{padding:10px 6px;min-height:205px}.pokemon img{height:78px;width:78px}.filters{width:100%}.filters input{width:100%}.stats .stat{padding:13px}.stat .num{font-size:24px}.toolbar{padding:12px}}
+
+/* v2 detail overlay */
+.pokemon[data-details]{cursor:pointer}.pokemon[data-details]:focus-visible{outline:2px solid #58e4b2;outline-offset:3px}.pokemon[data-details]:hover{border-color:#36c89f;transform:translateY(-2px)}
+.pokemon-dialog{width:min(740px,calc(100vw - 24px));max-height:min(90vh,920px);overflow:auto;background:#152137;color:#e9f0fc;border:1px solid #3b5375;border-radius:18px;padding:22px;box-shadow:0 20px 90px #000a}
+.pokemon-dialog::backdrop{background:#010714c7}.dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid #334866;padding-bottom:14px}.dialog-head strong{color:#69e7b8}.detail-hero{display:flex;gap:25px;align-items:center;background:#101b2e;border:1px solid #31425f;border-radius:14px;padding:16px}.detail-hero>img{width:122px;height:122px;image-rendering:pixelated;object-fit:contain}.detail-hero h2{font-size:25px;margin:6px 0 10px}.detail-content h3{font-size:17px;color:#72e8b8;margin:25px 0 10px}.detail-content p{color:#b1c2d7;line-height:1.7}.detail-content .note{color:#92a4bd;font-size:12px}.evo-node{display:flex;align-items:center;gap:12px;margin:9px 0;padding:9px 12px 9px calc(12px + var(--depth)*20px);background:#1e304b;border-radius:10px;border-left:3px solid #36c89f}.evo-node img{width:64px;height:64px;object-fit:contain;image-rendering:pixelated}.evo-node-text{display:grid;gap:6px}.evo-node-text small{color:#acc4de;line-height:1.5}.detail-link{display:inline-flex;background:#256f68;border:1px solid #4adea8;padding:11px 16px;border-radius:10px;color:#fff;text-decoration:none;font-weight:700}.detail-link:hover{background:#167868}.detail-content code{color:#8efbd1}@media(max-width:600px){.pokemon-dialog{padding:15px}.detail-hero{gap:12px}.detail-hero>img{width:84px;height:84px}.evo-node{padding-left:calc(8px + var(--depth)*12px)}}
+
+.spawn-row{margin:10px 0;padding:12px;background:#1e304b;border:1px solid #334965;border-radius:10px;color:#c9d8ea;line-height:1.8;overflow-wrap:anywhere}.spawn-row b{color:#80e8bd}.spawn-row div{font-size:13px}.pokemon-dialog input[type=file]{display:block;width:100%;padding:16px;background:#263449;border-radius:10px;color:#e1f7ee}.pokemon-dialog button{margin-top:8px}
+
+.spawn-hint{font-size:.85em;line-height:1.5;color:#a9c8dd;margin-top:5px;font-weight:400}
+
+/* V8 biome origin labels */
+.biome-origin{font-size:.79rem;font-weight:700;display:inline-block;margin-top:5px;padding:4px 8px;border-radius:6px;background:#2f405b;color:#dce9fa}
+.biome-origin-basic{background:#173b37;color:#80e5bd}.biome-origin-mod{background:#463357;color:#eec7ff}.biome-origin-special{background:#353f78;color:#c8d3ff}.biome-origin-group,.biome-origin-unknown{background:#4a3b27;color:#ffdaa0}
+
+/* V10: 세대별 보기 버튼 */
+.generation-bar{display:flex;align-items:center;gap:16px;padding:14px 17px;margin-top:-8px;margin-bottom:14px;flex-wrap:wrap}
+.generation-label{font-weight:750;color:#d4e6f4;white-space:nowrap;font-size:13px}
+.generation-buttons{display:flex;gap:7px;flex-wrap:wrap;flex:1}
+button.generation-btn{background:#243650!important;border:1px solid #455974!important;color:#d5e7f7!important;padding:9px 14px!important;border-radius:9px!important;min-width:62px;font-weight:700;font-size:13px}
+button.generation-btn:hover{border-color:#6ee8bf!important}
+button.generation-btn.active{background:#42d7a7!important;border-color:#42d7a7!important;color:#082720!important}
+button.generation-btn:focus-visible{outline:3px solid #f0db83;outline-offset:2px}
+@media(max-width:580px){.generation-bar{gap:9px}.generation-buttons{gap:6px}button.generation-btn{min-width:55px;padding:9px 10px!important}}
+
+/* V12: permanently show both progress mode controls */
+#rankView #progressPersonal, #rankView #progressShared {display:inline-flex!important;visibility:visible!important;opacity:1!important;align-items:center;justify-content:center;min-width:72px;}
+#rankView #progressPersonal.active, #rankView #progressShared.active {background:#50deaa;color:#072218;}
+#rankView .tabs {display:inline-flex;gap:3px;}
+
+/* V14: separate login and email signup while preserving the existing site */
+.authbox{max-width:850px}
+@media(max-width:740px){}
+
+/* Hide signup-only nickname unless joining; overrides flex label style. */
+#signupNicknameLabel[hidden]{display:none!important}
+
+/* V21: modal scroll chaining protection */
+.pokemon-dialog{overscroll-behavior:contain;}
+body.detail-background-locked{overflow:hidden;}
+
+/* V23: prevent scrolling behind modal and scroll chaining */
+html:has(dialog[open]),body:has(dialog[open]){overflow:hidden!important;overscroll-behavior:none;}
+.pokemon-dialog{overscroll-behavior:contain;touch-action:none;}
+
+/* V24: 포획 상태 버튼은 세대별 보기와 별도로 배치 */
+.status-bar{margin-top:-8px;margin-bottom:14px}
+.status-bar .generation-buttons{flex:initial}
+
+/* V25 collection management */
+.dex-actions{margin:8px 0 16px;padding:16px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
+.dex-action-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto;}
+.dex-actions .muted{width:100%;margin:0;}
+.dex-actions button[hidden]{display:none!important;}
+
+/* V26: independent identifier and session preferences */
+.authbox .login-options{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-top:14px}
+.authbox label.login-check{display:inline-flex;flex:none;flex-direction:row;align-items:center;gap:7px;margin:0;color:#d6e8f7;cursor:pointer;font-size:14px}
+.authbox .login-check input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:#4de4b0;margin:0}
+.authbox .login-options-note{font-size:12px;color:#91a9c1;margin:7px 0 12px;line-height:1.6}
