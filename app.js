@@ -72,12 +72,27 @@ state.species=Array.from({length:1025},(_,ix)=>{let id=ix+1;return {id,name:ko.g
 for(const mon of state.species){if(mon.parent&&mon.parent<=1025)state.species[mon.parent-1].children.push(mon.id)}
 try{localStorage.setItem(cacheKey,JSON.stringify(state.species))}catch{}render();
 }catch(e){$('dataStatus').textContent='도감 원본 데이터를 불러오지 못했습니다. 인터넷 연결 및 GitHub Raw 접근을 확인하고 새로고침하세요.';console.error(e);toast('포켓몬 데이터 연결 실패')}}
-function applyConfig(){let config;try{config=JSON.parse(localStorage.getItem('pixelmon_sb_config')||'null')}catch{}if(!config?.url||!config?.key){$('setup').hidden=false;$('authPanel').hidden=true;$('mainContent').hidden=true;$('connectStatus').textContent='● 연결 설정 필요';return} $('sbUrl').value=config.url;$('sbKey').value=config.key;try{
-  // V25 stored persistent sessions by default; clear those on upgrade unless the
-  // user explicitly opted into persistent login under V26.
-  const tokenKey=authTokenKey(config.url);
-  if(tokenKey&&!loginKept())localStorage.removeItem(tokenKey);
-  state.client=createClient(config.url,config.key,{auth:{persistSession:true,autoRefreshToken:true,storage:authStorage(),storageKey:tokenKey}});$('connectStatus').textContent='● 연결됨';$('setup').hidden=true;state.client.auth.onAuthStateChange((event)=>{if(['SIGNED_IN','SIGNED_OUT','TOKEN_REFRESHED'].includes(event))setTimeout(()=>loadAccount(),0)});loadAccount()}catch(e){toast('연결 설정을 확인하세요: '+e.message);$('setup').hidden=false}}
+// V27: Shared public connection settings embedded for all visitors.
+// This is a publishable key, never a service-role/secret key.
+const PIXELMON_PUBLIC_CONFIG = Object.freeze({
+  url: 'https://tdmrakyoldxphefmuqvb.supabase.co',
+  key: 'sb_publishable_OTNAy1oHhOD59ChsioKtWQ_aG0kWGe2'
+});
+function applyConfig(){
+  const config=PIXELMON_PUBLIC_CONFIG;
+  $('setup').hidden=true;
+  $('settingsBtn').hidden=true;
+  try{
+    const tokenKey=authTokenKey(config.url);
+    if(tokenKey&&!loginKept())localStorage.removeItem(tokenKey);
+    state.client=createClient(config.url,config.key,{auth:{persistSession:true,autoRefreshToken:true,storage:authStorage(),storageKey:tokenKey}});
+    $('connectStatus').textContent='● 연결됨';
+    state.client.auth.onAuthStateChange(event=>{
+      if(['SIGNED_IN','SIGNED_OUT','TOKEN_REFRESHED'].includes(event))setTimeout(()=>loadAccount(),0);
+    });
+    loadAccount();
+  }catch(e){console.error(e);toast('서버 연결에 실패했습니다. 새로고침 후 다시 시도해 주세요.');showAuth()}
+}
 async function loadAccount(){if(!state.client)return;const {data:{user},error}=await state.client.auth.getUser();if(error||!user){state.user=null;state.profile=null;showAuth();return}state.user=user;$('logoutBtn').hidden=false;const {data:profile,error:err}=await state.client.from('profiles').select('id,nickname,role,approved').eq('id',user.id).maybeSingle();if(err){toast('프로필 불러오기 실패: '+err.message);showAuth();return}state.profile=profile;$('accountLabel').textContent=profile?.nickname || '사용자';if(!profile?.approved){$('authPanel').hidden=true;$('pendingPanel').hidden=false;$('mainContent').hidden=true;$('adminNav').hidden=true;return}
 $('authPanel').hidden=true;$('pendingPanel').hidden=true;$('mainContent').hidden=false;$('adminNav').hidden=profile.role!=='admin';await refreshCollections();if(state.view==='rank')loadProgress();if(state.view==='admin'&&profile.role!=='admin')setView('dex');render()}
 function showAuth(){$('adminNav').hidden=true;if(state.view==='admin')state.view='dex';$('authPanel').hidden=false;$('pendingPanel').hidden=true;$('mainContent').hidden=true;$('logoutBtn').hidden=true;$('accountLabel').textContent='로그인이 필요합니다'}
