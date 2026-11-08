@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { translateSpawnPhrase, translateSpawnValue } from './translations-ko.js';
 const $ = id => document.getElementById(id);
 const genEnds=[151,251,386,493,649,721,809,905,1025];
 const generation=i=>genEnds.findIndex(v=>i<=v)+1;
@@ -342,12 +343,41 @@ const idFromURL=u=>Number(u?.match(/\/(\d+)\/?$/)?.[1])||0;
 const monName=(id, fallback='')=>state.species[id-1]?.name||fallback||`#${id}`;
 const itemKo={'fire-stone':'불꽃의돌','water-stone':'물의돌','thunder-stone':'천둥의돌','leaf-stone':'리프의돌','moon-stone':'달의돌','sun-stone':'태양의돌','dusk-stone':'어둠의돌','dawn-stone':'각성의돌','shiny-stone':'빛의돌','ice-stone':'얼음의돌','kings-rock':'왕의징표석','metal-coat':'금속코트','dragon-scale':'용의비늘','upgrade':'업그레이드','dubious-disc':'괴상한패치','protector':'프로텍터','electirizer':'에레키부스터','magmarizer':'마그마부스터','reaper-cloth':'영계의천','razor-claw':'예리한손톱','razor-fang':'예리한이빨','prism-scale':'고운비늘','oval-stone':'동글동글돌','deep-sea-tooth':'심해의이빨','deep-sea-scale':'심해의비늘','sweet-apple':'달콤한사과','tart-apple':'새콤한사과','sachet':'향기주머니','whipped-dream':'휘핑팝','linking-cord':'연결의끈'};
 const typesKo={'dark':'악','water':'물','fire':'불꽃','grass':'풀','electric':'전기','ice':'얼음','rock':'바위','ground':'땅','flying':'비행','psychic':'에스퍼','fairy':'페어리','normal':'노말','ghost':'고스트','fighting':'격투','steel':'강철','bug':'벌레','dragon':'드래곤','poison':'독'};
-function phrase(code){return itemKo[code]||typesKo[code]||pretty(code)+' (원어명 확인 필요)'}
+const evoItemNames=new Map(),evoLocationNames=new Map();
+function knownSpeciesKorean(slug){const found=state.species.find(mon=>stripName(mon.english)===stripName(slug));return found?.name||'';}
+function evoSpeciesLabel(species){return knownSpeciesKorean(species?.name)||pretty(species?.name)||'정보 없음';}
+function phrase(code){return itemKo[code]||typesKo[code]||evoItemNames.get(code)||pretty(code)+' (원어명 확인 필요)'}
 const koMoveNames=new Map([['rage-fist','분노의주먹'],['psyshield-bash','배리어러시'],['barb-barrage','독침천발'],['dragon-cheer','드래곤옐'],['ancient-power','원시의힘'],['mimic','흉내내기'],['rollout','구르기'],['double-hit','더블어택']]);
-function moveLabel(slug){return koMoveNames.get(slug)||'기술명 조회 실패 ('+slug+')'}
+function moveLabel(slug){return koMoveNames.get(slug)||'기술명 확인 필요 ('+pretty(slug)+')'}
 async function resolveEvoKorean(chain){
- const moves=new Set();function walk(node){for(const d of node.evolution_details||[])for(const m of [d.used_move,d.known_move])if(m?.name&&!koMoveNames.has(m.name))moves.add(m.name);for(const n of node.evolves_to||[])walk(n)}walk(chain);
- await Promise.all([...moves].map(async slug=>{try{const r=await fetch('https://pokeapi.co/api/v2/move/'+encodeURIComponent(slug)+'/');if(!r.ok)return;const obj=await r.json();const name=obj.names?.find(x=>x.language.name==='ko')?.name;if(name)koMoveNames.set(slug,name)}catch(e){console.warn('기술명 조회 오류',slug,e)}}));
+ const moves=new Set(),items=new Set(),locations=new Set();
+ function walk(node){
+  for(const d of node.evolution_details||[]){
+   for(const move of [d.used_move,d.known_move])if(move?.name&&!koMoveNames.has(move.name))moves.add(move.name);
+   for(const item of [d.item,d.held_item])if(item?.name&&!itemKo[item.name]&&!evoItemNames.has(item.name))items.add(item.name);
+   if(d.location?.name&&!evoLocationNames.has(d.location.name))locations.add(d.location.name);
+  }
+  for(const n of node.evolves_to||[])walk(n);
+ }
+ walk(chain);
+ const requests=[
+  ...[...moves].map(slug=>({type:'move',slug})),
+  ...[...items].map(slug=>({type:'item',slug})),
+  ...[...locations].map(slug=>({type:'location',slug}))
+ ];
+ await Promise.all(requests.map(async ({type,slug})=>{
+  try{
+   const r=await fetch('https://pokeapi.co/api/v2/'+type+'/'+encodeURIComponent(slug)+'/');
+   if(!r.ok)return;
+   const obj=await r.json();
+   const name=obj.names?.find(x=>x.language.name==='ko')?.name;
+   if(name){
+    if(type==='move')koMoveNames.set(slug,name);
+    if(type==='item')evoItemNames.set(slug,name);
+    if(type==='location')evoLocationNames.set(slug,name);
+   }
+  }catch(e){console.warn('진화 조건 한글 정보 조회 오류',type,slug,e)}
+ }));
 }
 // 조사 자동 선택: 받침이 없거나 ㄹ 받침이면 '로', 그 외 받침이면 '으로'.
 function withEuroRo(name){
@@ -381,12 +411,12 @@ function evoCondition(d,sourceName=""){
  if(d.time_of_day)a.push(d.time_of_day==='day'?'낮에':d.time_of_day==='night'?'밤에':d.time_of_day==='dusk'?'해질녘에':`시간 조건: ${pretty(d.time_of_day)}`);
  if(d.known_move)a.push(`${moveLabel(d.known_move.name)} 기술을 배운 상태`);
  if(d.known_move_type)a.push(`${phrase(d.known_move_type.name)} 타입 기술을 배운 상태`);
- if(d.location)a.push(`${pretty(d.location.name)} 지역에서 (지역명 확인 필요)`);
+ if(d.location)a.push(`${evoLocationNames.get(d.location.name)||pretty(d.location.name)+' (원어명 확인 필요)'} 지역에서`);
  if(d.needs_overworld_rain)a.push('게임 안에서 비가 오는 날');
  if(d.needs_multiplayer)a.push('다른 플레이어와 함께 있는 상태');
- if(d.party_species)a.push(`파티에 ${pretty(d.party_species.name)}이(가) 있어야 함`);
+ if(d.party_species)a.push(`파티에 ${evoSpeciesLabel(d.party_species)}이(가) 있어야 함`);
  if(d.party_type)a.push(`파티에 ${phrase(d.party_type.name)} 타입 포켓몬이 있어야 함`);
- if(d.trade_species)a.push(`${pretty(d.trade_species.name)}과 교환`);
+ if(d.trade_species)a.push(`${evoSpeciesLabel(d.trade_species)}과 교환`);
  if(d.gender===1)a.push('암컷만');else if(d.gender===2)a.push('수컷만');
  if(d.turn_upside_down)a.push('특수 자세 조건 (픽셀몬에서 적용되는 방식 별도 확인)');
  if(d.relative_physical_stats===1)a.push('공격이 방어보다 높아야 함');else if(d.relative_physical_stats===0)a.push('공격과 방어가 같아야 함');else if(d.relative_physical_stats===-1)a.push('방어가 공격보다 높아야 함');
@@ -423,8 +453,8 @@ try{const raw=JSON.parse(localStorage.getItem(spawnStore)||'null');if(raw)for(co
 function stripName(v){return String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
 function speciesKeys(item){let keys=[];for(const k of ['pokemon','species','spec','pokemonSpec','pokemonSpecification']){let v=item[k];if(typeof v==='string')keys.push(v);else if(v?.species)keys.push(v.species)}return keys}
 function extractEntries(obj,path){let found=[];function walk(x,depth=0){if(!x||typeof x!=='object'||depth>10)return;if(Array.isArray(x)){x.forEach(z=>walk(z,depth+1));return}const spec=speciesKeys(x);if(spec.length)found.push({spec:spec.join(', '),biomes:x.biomes||x.biome||x.condition?.biomes||x.conditions?.biomes||x.spawnConditions?.biomes||[],time:x.time||x.times||x.condition?.times||x.conditions?.times||null,weather:x.weather||x.condition?.weather||x.conditions?.weather||null,method:path.split('/').slice(-2,-1)[0]||'기본 스폰',rarity:x.rarity||x.weight||'',raw:x});for(const [k,v] of Object.entries(x)){if(typeof v==='object'&&k!=='raw')walk(v,depth+1)}}walk(obj);return found}
-function brief(v){if(v==null||v==='')return '별도 조건 없음';if(typeof v==='string')return escapeHTML(v.replaceAll('minecraft:','').replaceAll('pixelmon:',''));return escapeHTML(JSON.stringify(v).replaceAll('minecraft:','').replaceAll('pixelmon:',''))}
-function showSpawn(mon){let entries=spawnByName.get(stripName(mon.english))||[];const old=legacySpawnByName.get(stripName(mon.english))||[];const isFallback=!entries.length&&old.length;if(isFallback)entries=old;if(!entries.length)return `<p class="muted">이 포켓몬의 출현 자료가 없습니다. 최신 모드 파일 또는 이전 버전 스폰 데이터를 등록할 수 있습니다. 야생에서 나오지 않는 포켓몬일 수도 있습니다.</p><button class="minor" id="importSpawnOpen">스폰 데이터 파일 등록하기</button>`;return `<p class="muted">${isFallback?`이전 자료 (${escapeHTML(spawnOrigin)}) 참고 · 최신 데이터에서 항목을 찾지 못함`:`최신으로 등록한 모드 파일 기준`} · 출현 항목 ${entries.length}개 · 서버 설정에 따라 다를 수 있음</p>${entries.map(e=>`<div class="spawn-row"><b>${brief(e.method)} · ${brief(e.spec)}</b><div>바이옴: ${brief(e.biomes)}</div><div>시간: ${brief(e.time)} · 날씨: ${brief(e.weather)}</div>${e.rarity?`<div>희귀도/가중치: ${brief(e.rarity)}</div>`:''}</div>`).join('')}<button class="minor" id="importSpawnOpen">스폰 데이터 파일 등록/갱신</button>`}
+function brief(v,kind='general'){return escapeHTML(translateSpawnValue(v,(value,context)=>koSpawn(value,context),kind))}
+function showSpawn(mon){let entries=spawnByName.get(stripName(mon.english))||[];const old=legacySpawnByName.get(stripName(mon.english))||[];const isFallback=!entries.length&&old.length;if(isFallback)entries=old;if(!entries.length)return `<p class="muted">이 포켓몬의 출현 자료가 없습니다. 최신 모드 파일 또는 이전 버전 스폰 데이터를 등록할 수 있습니다. 야생에서 나오지 않는 포켓몬일 수도 있습니다.</p><button class="minor" id="importSpawnOpen">스폰 데이터 파일 등록하기</button>`;return `<p class="muted">${isFallback?`이전 자료 (${escapeHTML(spawnOrigin)}) 참고 · 최신 데이터에서 항목을 찾지 못함`:`최신으로 등록한 모드 파일 기준`} · 출현 항목 ${entries.length}개 · 서버 설정에 따라 다를 수 있음</p>${entries.map(e=>`<div class="spawn-row"><b>${brief(e.method)} · ${brief(e.spec)}</b><div>바이옴: ${brief(e.biomes,'biome')}</div><div>시간: ${brief(e.time,'time')} · 날씨: ${brief(e.weather,'weather')}</div>${e.rarity?`<div>희귀도/가중치: ${brief(e.rarity)}</div>`:''}</div>`).join('')}<button class="minor" id="importSpawnOpen">스폰 데이터 파일 등록/갱신</button>`}
 // Pixelmon Wiki's published per-species spawn tables. Inline data is kept for
 // validated examples; other entries are fetched through the public MediaWiki API.
 // Wiki entries are not guaranteed to match every server or a specific JAR revision.
@@ -459,18 +489,18 @@ const spawnBiomeHints={
  'Warm Beach':'TerraForged 지형 모드 자료에 등장하는 따뜻한 해변이에요.'
 };
 const normalizeSpawnText=v=>String(v??'').replace(/\s+/g,' ').trim();
-function koSpawn(v){
+function koSpawn(v,kind='general'){ 
  const raw=normalizeSpawnText(v);if(!raw||raw==='—'||raw==='-'||raw==='None')return '별도 조건 없음';
  const direct=spawnKorean[raw];if(direct)return direct;
  const pieces=raw.split(/\s*[,;/|]\s*/);
- if(pieces.length>1)return pieces.map(koSpawn).join(' · ');
+ if(pieces.length>1)return pieces.map(piece=>koSpawn(piece,kind)).join(' · ');
  const suffix=raw.match(/^(.+?)\s*\((BYG|BOP|Biomes O' Plenty|Terraforged|Terralith)\)$/i);
  if(suffix){let x=koSpawn(suffix[1]);return x.includes('(')?x:x+' ('+suffix[2]+')'}
  const generic={'Forest':'숲','Beach':'해변','Ocean':'바다','River':'강','Plains':'평원','Hills':'언덕','Mountains':'산악','Jungle':'정글','Desert':'사막','Swamp':'늪지','Taiga':'타이가','Island':'섬','Islands':'섬','Lake':'호수','Lakes':'호수','Cave':'동굴','Caves':'동굴','Valley':'계곡','Garden':'정원','Gardens':'정원','Shore':'해안','Snowy':'눈 덮인','Frozen':'얼어붙은','Warm':'따뜻한','Cold':'차가운','Deep':'깊은','Dark':'어두운','Flower':'꽃','Mushroom':'버섯','Rocky':'바위','Birch':'자작나무','Bamboo':'대나무','Tropical':'열대','Mountain':'산','Lush':'무성한','Ultra':'울트라','Gravel':'자갈','White':'하얀','Rainbow':'무지개','Crimson':'진홍빛','Warped':'뒤틀린','Basalt':'현무암','Stony':'돌이 많은','Meadow':'초원'};
  if(/^[A-Za-z][A-Za-z -]*$/.test(raw)){
   const words=raw.split(/\s+/);if(words.every(w=>generic[w]))return words.map(w=>generic[w]).join(' ');
  }
- return raw;
+ return translateSpawnPhrase(raw,kind,knownSpeciesKorean);
 }
 function spawnHint(v){const k=normalizeSpawnText(v);return spawnBiomeHints[k]||''}
 
@@ -516,7 +546,7 @@ function spawnCell(v){
 }
 const wikiCache=new Map();
 function wikiTitle(mon){return mon.english.replaceAll(' ','_')}
-function spawnRowsMarkup(rows,source){return `<p class="muted">${escapeHTML(source)} · 서버 설정에 따라 달라질 수 있음</p>`+rows.map(row=>`<div class="spawn-row"><b>바이옴: ${spawnCell(row[0])}</b><div>시간: ${escapeHTML(koSpawn(row[1]))} · 장소: ${escapeHTML(koSpawn(row[2]))}</div><div>조건: ${escapeHTML(koSpawn(row[3]))} · 희귀도: ${escapeHTML(koSpawn(row[4]))}</div></div>`).join('')}
+function spawnRowsMarkup(rows,source){return `<p class="muted">${escapeHTML(source)} · 서버 설정에 따라 달라질 수 있음</p>`+rows.map(row=>`<div class="spawn-row"><b>바이옴: ${spawnCell(row[0])}</b><div>시간: ${escapeHTML(koSpawn(row[1],'time'))} · 장소: ${escapeHTML(koSpawn(row[2],'location'))}</div><div>조건: ${escapeHTML(koSpawn(row[3],'condition'))} · 희귀도: ${escapeHTML(koSpawn(row[4],'rarity'))}</div></div>`).join('')}
 function extractWikiSpawnRows(html){
  const doc=new DOMParser().parseFromString(html,'text/html');
  const heads=[...doc.querySelectorAll('h2,h3')];
