@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { translateSpawnPhrase, translateSpawnValue } from './translations-ko.js';
+import { translateSpawnPhrase, translateSpawnValue } from './translations-ko.js?v=27';
 const $ = id => document.getElementById(id);
 const genEnds=[151,251,386,493,649,721,809,905,1025];
 const generation=i=>genEnds.findIndex(v=>i<=v)+1;

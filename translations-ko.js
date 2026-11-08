@@ -42,7 +42,35 @@ const glossary = Object.freeze({
   'Forest (Forge)':'Forge 태그 숲 지형',
   'None':'별도 조건 없음','N/A':'해당 없음','—':'별도 조건 없음'
 });
-const normalized = new Map(Object.entries(glossary).map(([k,v]) => [k.toLowerCase(),v]));
+// Additional wiki phrases. These are presentation-only translations.
+const wikiAdditional=Object.freeze({
+  'Lava Floor':'용암 표면','Water Floor':'물 표면',
+  'Water Surface':'수면','Lava Surface':'용암 표면',
+  'Good Rod (Lava)':'좋은낚싯대로 용암 낚시',
+  'Old Rod (Lava)':'낡은낚싯대로 용암 낚시',
+  'Super Rod (Lava)':'대단한낚싯대로 용암 낚시',
+  'Good Rod (Water)':'좋은낚싯대로 물에서 낚시',
+  'Old Rod (Water)':'낡은낚싯대로 물에서 낚시',
+  'Super Rod (Water)':'대단한낚싯대로 물에서 낚시',
+  'Good Rod Lava':'좋은낚싯대로 용암 낚시',
+  'Old Rod Lava':'낡은낚싯대로 용암 낚시',
+  'Super Rod Lava':'대단한낚싯대로 용암 낚시',
+  'Good Rod Water':'좋은낚싯대로 물에서 낚시',
+  'Old Rod Water':'낡은낚싯대로 물에서 낚시',
+  'Super Rod Water':'대단한낚싯대로 물에서 낚시',
+  'Near Coal Ore':'석탄 광석 근처','Coal Ore':'석탄 광석',
+  'Iron Ore':'철 광석','Gold Ore':'금 광석',
+  'Diamond Ore':'다이아몬드 광석',
+  'Basalt Deltas':'현무암 삼각주','Nether Wastes':'네더 황무지',
+  'Magma Wastes':'마그마 황무지',
+  'Ultra Desert':'울트라 사막','Ultra Desert (PM)':'울트라 사막',
+  'Ultra Crater':'울트라 크레이터','Ultra Forest':'울트라 숲',
+  'Ultra Jungle':'울트라 정글','Arid':'건조 지형',
+  'Savannas':'사바나 계열','Mesas':'메사 지형 계열',
+  'Volcanic Plains':'화산 평원','Volcano':'화산',
+  'Hellish':'지옥 지형','Any Biome':'모든 바이옴'
+});
+const normalized = new Map([...Object.entries(glossary),...Object.entries(wikiAdditional)].map(([k,v]) => [k.toLowerCase(),v]));
 const words = Object.freeze({
   all:'모든', any:'모든', old:'오래된', ancient:'고대의', new:'새로운',
   forest:'숲', forests:'숲 계열', jungle:'정글', jungles:'정글 계열',
@@ -93,7 +121,15 @@ export function translateSpawnPhrase(value,kind='general',pokemonName=()=>null){
   const groups=raw.split(/\s*[,;/|]\s*/).filter(Boolean);
   if(groups.length>1)return groups.map(x=>translateSpawnPhrase(x,kind,pokemonName)).join(' · ');
 
-  let m=raw.match(/^(\d+(?:\.\d+)?)\s*[x×]\s*Spawn Rate(?:\s+(Near|Nearby|Around|In|During|At|Under)\s+(.+))?$/i);
+  // Rod names sometimes include a medium suffix (e.g. Good Rod (Lava)).
+  let m=raw.match(/^(Old|Good|Super)\s+Rod(?:\s*\(\s*(Lava|Water)\s*\)|\s+(Lava|Water))?$/i);
+  if(m){
+    const rod=normalized.get((m[1]+' Rod').toLowerCase());
+    const medium=(m[2]||m[3]||'').toLowerCase();
+    return medium==='lava' ? rod+'로 용암 낚시' :
+      medium==='water' ? rod+'로 물에서 낚시' : rod;
+  }
+  m=raw.match(/^(\d+(?:\.\d+)?)\s*[x×]\s*Spawn Rate(?:\s+(Near|Nearby|Around|In|During|At|Under)\s+(.+))?$/i);
   if(m){
     if(!m[2])return '출현 확률 '+m[1]+'배';
     const place=target(m[3]);
@@ -101,7 +137,7 @@ export function translateSpawnPhrase(value,kind='general',pokemonName=()=>null){
     if(/^Clear Weather|Rainy Weather|Snowy Weather|Night|Day$/i.test(m[3]))return place+'에 출현 확률 '+m[1]+'배';
     return place+' 근처에서 출현 확률 '+m[1]+'배';
   }
-  m=raw.match(/^(Min|Max)\s+(Y|Height|Light Level|Light)\s*(-?\d+)$/i);
+  m=raw.match(/^(Min|Max)\s+(Y(?: Level)?|Height|Light Level|Light)\s*(-?\d+)$/i);
   if(m)return (m[2].toLowerCase().startsWith('light')?'밝기':'Y좌표')+' '+m[3]+(m[1].toLowerCase()==='min'?' 이상':' 이하');
   m=raw.match(/^Y\s*(<=|>=|<|>|≤|≥)\s*(-?\d+)$/i);
   if(m)return 'Y좌표 '+m[2]+' '+({'<=':'이하','≤':'이하','>=':'이상','≥':'이상','<':'미만','>':'초과'}[m[1]]);
