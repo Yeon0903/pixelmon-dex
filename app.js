@@ -350,8 +350,34 @@ function phrase(code){return itemKo[code]||typesKo[code]||evoItemNames.get(code)
 const koMoveNames=new Map([['rage-fist','분노의주먹'],['psyshield-bash','배리어러시'],['barb-barrage','독침천발'],['dragon-cheer','드래곤옐'],['ancient-power','원시의힘'],['mimic','흉내내기'],['rollout','구르기'],['double-hit','더블어택']]);
 function moveLabel(slug){return koMoveNames.get(slug)||'기술명 확인 필요 ('+pretty(slug)+')'}
 async function resolveEvoKorean(chain){
- const moves=new Set();function walk(node){for(const d of node.evolution_details||[])for(const m of [d.used_move,d.known_move])if(m?.name&&!koMoveNames.has(m.name))moves.add(m.name);for(const n of node.evolves_to||[])walk(n)}walk(chain);
- await Promise.all([...moves].map(async slug=>{try{const r=await fetch('https://pokeapi.co/api/v2/move/'+encodeURIComponent(slug)+'/');if(!r.ok)return;const obj=await r.json();const name=obj.names?.find(x=>x.language.name==='ko')?.name;if(name)koMoveNames.set(slug,name)}catch(e){console.warn('기술명 조회 오류',slug,e)}}));
+ const moves=new Set(),items=new Set(),locations=new Set();
+ function walk(node){
+  for(const d of node.evolution_details||[]){
+   for(const move of [d.used_move,d.known_move])if(move?.name&&!koMoveNames.has(move.name))moves.add(move.name);
+   for(const item of [d.item,d.held_item])if(item?.name&&!itemKo[item.name]&&!evoItemNames.has(item.name))items.add(item.name);
+   if(d.location?.name&&!evoLocationNames.has(d.location.name))locations.add(d.location.name);
+  }
+  for(const n of node.evolves_to||[])walk(n);
+ }
+ walk(chain);
+ const requests=[
+  ...[...moves].map(slug=>({type:'move',slug})),
+  ...[...items].map(slug=>({type:'item',slug})),
+  ...[...locations].map(slug=>({type:'location',slug}))
+ ];
+ await Promise.all(requests.map(async ({type,slug})=>{
+  try{
+   const r=await fetch('https://pokeapi.co/api/v2/'+type+'/'+encodeURIComponent(slug)+'/');
+   if(!r.ok)return;
+   const obj=await r.json();
+   const name=obj.names?.find(x=>x.language.name==='ko')?.name;
+   if(name){
+    if(type==='move')koMoveNames.set(slug,name);
+    if(type==='item')evoItemNames.set(slug,name);
+    if(type==='location')evoLocationNames.set(slug,name);
+   }
+  }catch(e){console.warn('진화 조건 한글 정보 조회 오류',type,slug,e)}
+ }));
 }
 // 조사 자동 선택: 받침이 없거나 ㄹ 받침이면 '로', 그 외 받침이면 '으로'.
 function withEuroRo(name){
